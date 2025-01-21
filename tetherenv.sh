@@ -30,4 +30,3 @@ elif { [ "$1" == "run" ]; }; then
     echo "Starting src/main.py...(venv)"
     python src/main.py
 fi
-

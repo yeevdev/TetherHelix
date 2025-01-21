@@ -3,6 +3,6 @@
 
 import pyupbit
 
-def get_usdt_for_krw():
+def get_usdt_price():
     ticker = "KRW-USDT"
     return pyupbit.get_current_price([ticker])
