@@ -7,14 +7,15 @@ An automated Upbit trading bot that leverages real-time data and customizable st
 ![MySQL](https://img.shields.io/badge/mysql-%234479A1.svg?&style=for-the-badge&logo=mysql&logoColor=white)
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 
-### How to execute program guide
+### How to execute?
+
+For pycharm users, skip to number 2.
 
 At the terminal(UNIX/LINUX supported)
 1. enableing python virtual environment + requirements.txt installation
 ```
 ./tetherenv.sh -e
-
-./tetherenv.sh -e clear #remove virtual env and reinstall
+source .venv/bin/activate
 ```
 2. launch
 ```

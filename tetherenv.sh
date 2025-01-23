@@ -6,7 +6,7 @@ if { [ "#$" == 0 ]; }; then
 fi
 
 if { [ "$1" = "-h" ] || [ "$1" = "--help" ]; }; then
-    echo "Tetherhelix Environment Manager v.1.2(by ReenAG)"
+    echo "Tetherhelix Environment Manager v.1.2.1(by ReenAG)"
     echo "Options :"
     echo "-p, --preserve : renew requirement.txt from current environment"
     echo "-h, --help : print this help"
@@ -21,15 +21,18 @@ elif { [ "$1" = "-p" ] || [ "$1" = "--preserve" ]; }; then
 elif { [ "$1" == "-e" ] || [ "$1" == "--enable" ]; }; then
     if { [ "$2" == "clear" ]; }; then
         echo "Clearing Currnet Environment..."
-        rm -rf tetherhelix_pyenv
+        rm -rf .venv
     fi
     echo "Enableing python virtual environment..."
-    python3 -m venv tetherhelix_pyenv && source tetherhelix_pyenv/bin/activate 
+    python3 -m venv .venv && source .venv/bin/activate 
     echo "Installing requrements.txt"
     pip install -r requirements.txt
-    echo "Done!"
+    echo "Setting is done! Type this command to start."
+    echo ""
+    echo "source .venv/bin/activate"
+    echo ""
 elif { [ "$1" == "run" ]; }; then
-    python3 -m venv tetherhelix_pyenv && source tetherhelix_pyenv/bin/activate
+    python3 -m venv .venv && source .venv/bin/activate
     echo "Starting src/main.py...(venv)"
     python src/main.py
 fi
