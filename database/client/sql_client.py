@@ -17,3 +17,7 @@ class SQLClient(ABC):
     @abstractmethod
     def execute_with_commit(self, query) -> None:
         pass
+
+    @abstractmethod
+    def check_table_exists(self, dbname) -> bool:
+        pass

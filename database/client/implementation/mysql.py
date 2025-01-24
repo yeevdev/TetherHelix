@@ -16,7 +16,21 @@ class MySQLClient(SQLClient):
             password=mysql_password,
             database=mysql_database,
             cursorclass=pymysql.cursors.DictCursor)
-    
+        
+    def check_table_exists(self, table_name) -> bool:
+        query = """
+        SELECT EXISTS (
+            SELECT 1 
+            FROM INFORMATION_SCHEMA.TABLES 
+            WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME = %s
+        ) AS table_exists;
+        """
+        with self.connection.cursor() as cursor:
+            cursor.execute(query, (table_name))
+            exists = cursor.fetchone()["table_exists"]
+        return exists
+
     def execute_with_select_one(self, cls: Type[T], query) -> Optional[T]:
         result = self.execute_with_select(cls, query)
         if len(result) > 0:

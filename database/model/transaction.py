@@ -5,25 +5,17 @@ from typing import List, Optional;
 from util import Singleton;
 
 class OrderStatus:
-    BID_PLACED = "BID_PLACED"
-    BID_FILLED = "BID_FILLED"
-    ASK_PLACED = "ASK_PLACED"
-    ASK_FILLED = "ASK_FILLED"
+    BID_PLACED = 1
+    BID_FILLED = 2
+    ASK_PLACED = 3
+    ASK_FILLED = 4
 
 class TransactionManager(metaclass=Singleton):
     client: SQLClient
 
     def __init__(self):
         self.client: SQLClient = SQLManager().get_client()
-        query = """
-        SELECT EXISTS (
-            SELECT 1 
-            FROM INFORMATION_SCHEMA.TABLES 
-            WHERE TABLE_SCHEMA = DATABASE()
-            AND TABLE_NAME = 'transactions'
-        ) AS table_exists;
-        """
-        exists = self.client.execute_with_select_one(dict, query)["table_exists"]
+        exists = self.client.check_table_exists('transactions')
         if not exists:
             self.create()
 
@@ -45,7 +37,7 @@ class TransactionManager(metaclass=Singleton):
             ask_price FLOAT NULL,
             ask_fee FLOAT NULL,
 
-            order_status ENUM('BID_PLACED', 'BID_FILLED', 'ASK_PLACED', 'ASK_FILLED') NOT NULL DEFAULT "BID_PLACED",
+            order_status INT NOT NULL DEFAULT 1,
             tether_volume FLOAT NOT NULL,
             margin FLOAT NULL
         );
@@ -74,7 +66,7 @@ class TransactionManager(metaclass=Singleton):
         query = f"""
         UPDATE transactions
         SET
-            order_status = "BID_FILLED",
+            order_status = 2,
             bid_filled_at = "{bid_filled_at}"
         WHERE bid_uuid = "{bid_uuid}"
         """
@@ -90,7 +82,7 @@ class TransactionManager(metaclass=Singleton):
         query = f"""
         UPDATE transactions
         SET
-            order_status = "ASK_PLACED",
+            order_status = 3,
             ask_uuid = "{ask_uuid}",
             ask_created_at = "{ask_created_at}",
             ask_price = {ask_price},
@@ -107,19 +99,19 @@ class TransactionManager(metaclass=Singleton):
         query = f"""
         UPDATE transactions
         SET
-            order_status = "ASK_FILLED",
+            order_status = 4,
             ask_filled_at = "{ask_filled_at}"
         WHERE ask_uuid = "{ask_uuid}"
         """
         self.client.execute_with_commit(query)
 
-    def get_transactions_by_status(self, state) -> List[Transaction]:
+    def get_transactions_by_status(self, state: OrderStatus) -> List[Transaction]:
         #매수 주문만 들어간 기록 찾을 땐 get_transactions_by_status(OrderStatus.BID_PLACED)
         #매수 체결 까지 된 기록 찾을 땐 get_transactions_by_status(OrderStatus.BID_FILLED)
         #...이런 식으로 이용하면 Transaction 데이터가 들어있는 리스트를 반환합니다.
         query = f"""
         SELECT * FROM transactions
-        WHERE order_status = "{state}"
+        WHERE order_status = {int(state)}
         ORDER BY bid_created_at ASC;
         """
         result = self.client.execute_with_select(Transaction, query)

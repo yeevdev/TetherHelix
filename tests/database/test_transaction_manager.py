@@ -4,6 +4,8 @@
 from faker import Faker
 import datetime
 
+from database.model.transaction import OrderStatus
+
 # Faker 인스턴스 생성 (더미 데이터용)
 faker = Faker()
 
@@ -21,8 +23,7 @@ def test_bid_placed(dao):
 
     assert transaction is not None
     assert transaction.bid_uuid == bid_uuid
-    assert transaction.order_status == "BID_PLACED"
-
+    assert transaction.order_status == OrderStatus.BID_PLACED
 def test_bid_filled(dao):
     """매수 체결 후 상태가 변경되는지 확인"""
     bid_uuid = faker.uuid4()
@@ -33,7 +34,7 @@ def test_bid_filled(dao):
     transaction = dao.get_transaction_by_bid_uuid(bid_uuid)
 
     assert transaction is not None
-    assert transaction.order_status == "BID_FILLED"
+    assert transaction.order_status == OrderStatus.BID_FILLED
 
 def test_ask_placed_and_filled(dao):
     """매도 주문 및 매도 체결 테스트"""
@@ -48,12 +49,12 @@ def test_ask_placed_and_filled(dao):
     transaction = dao.get_transaction_by_bid_uuid(bid_uuid)
     assert transaction is not None
     assert transaction.ask_uuid == ask_uuid
-    assert transaction.order_status == "ASK_PLACED"
+    assert transaction.order_status == OrderStatus.ASK_PLACED
 
     dao.ask_filled(ask_uuid, timestamp)
     transaction = dao.get_transaction_by_bid_uuid(bid_uuid)
 
-    assert transaction.order_status == "ASK_FILLED"
+    assert transaction.order_status == OrderStatus.ASK_FILLED
 
 def test_get_transactions_by_status(dao):
     """특정 상태의 트랜잭션을 가져오는지 확인"""
@@ -61,6 +62,6 @@ def test_get_transactions_by_status(dao):
     dao.bid_placed(faker.uuid4(), timestamp, 1500, 5, 7500, 7.5)
     dao.bid_placed(faker.uuid4(), timestamp, 1500, 3, 4500, 4.5)
 
-    transactions = dao.get_transactions_by_status("BID_PLACED")
+    transactions = dao.get_transactions_by_status(OrderStatus.BID_PLACED)
     assert len(transactions) >= 2
-    assert all(tx.order_status == "BID_PLACED" for tx in transactions)
+    assert all(tx.order_status == OrderStatus.BID_PLACED for tx in transactions)

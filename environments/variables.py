@@ -14,6 +14,7 @@ MYSQL_ID = os.getenv("MYSQL_ID")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
 
+SQLITE3_DATABASE = os.getenv("SQLITE3_DATABASE")
 
 """
 Usage :

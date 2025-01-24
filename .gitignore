@@ -173,3 +173,6 @@ cython_debug/
 
 # Etc..
 .DS_Store
+
+#database
+tetherhelix.db
