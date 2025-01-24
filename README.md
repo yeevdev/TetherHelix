@@ -5,6 +5,7 @@ An automated Upbit trading bot that leverages real-time data and customizable st
 
 ![Tether](https://img.shields.io/badge/tether-168363?style=for-the-badge&logo=tether&logoColor=white)
 ![MySQL](https://img.shields.io/badge/mysql-%234479A1.svg?&style=for-the-badge&logo=mysql&logoColor=white)
+![SQLite3](https://img.shields.io/badge/sqlite-%23003B57.svg?&style=for-the-badge&logo=sqlite&logoColor=white)
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 
 ### How to execute?
