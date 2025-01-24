@@ -5,10 +5,15 @@ load_dotenv()
 
 UPBIT_ACCESS_KEY = os.getenv("UPBIT_ACCESS_KEY")
 UPBIT_SECRET_KEY = os.getenv("UPBIT_SECRET_KEY")
+
+def SQL_MODE(): #dynamic
+    return os.getenv("SQL_MODE")
+
 MYSQL_HOST = os.getenv("MYSQL_HOST")
 MYSQL_ID = os.getenv("MYSQL_ID")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
+
 
 """
 Usage :

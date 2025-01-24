@@ -1,7 +1,10 @@
 import pytest
+import os
 
 from database.model.transaction import TransactionManager
-from database.mysql import MySQLClient
+from database.client.implementation.mysql import MySQLClient
+from database.client.manager import SQLManager
+from util import Singleton
 
 # ✅ 테스트용 DB 연결 정보
 DB_CONFIG = {
@@ -13,8 +16,9 @@ DB_CONFIG = {
 
 @pytest.fixture(scope="package")
 def dao():
-    client = MySQLClient(**DB_CONFIG)
     """DAO 객체를 생성하고 테스트 후 닫기"""
-    dao_instance = TransactionManager(client=client)
+    client = MySQLClient(**DB_CONFIG)
+    os.environ["SQL_MODE"] = "TEST"
+    SQLManager(client_override=client)
+    dao_instance = TransactionManager()
     return dao_instance  # 테스트가 끝나면 dao_instance 반환
-    #dao_instance.close() # nothing to close here...

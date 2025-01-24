@@ -1,4 +1,5 @@
-from database.mysql import MySQLClient
+from database.client.manager import SQLManager
+from database.client.sql_client import SQLClient
 from database.model.dto.transaction import Transaction;
 from typing import List, Optional;
 from util import Singleton;
@@ -9,12 +10,11 @@ class OrderStatus:
     ASK_PLACED = "ASK_PLACED"
     ASK_FILLED = "ASK_FILLED"
 
-class TransactionManager(metaclass=Singleton):    
-    def __init__(self, client=None):
-        if client is MySQLClient:
-            self.client = client
-        else:
-            self.client = MySQLClient()
+class TransactionManager(metaclass=Singleton):
+    client: SQLClient
+
+    def __init__(self):
+        self.client: SQLClient = SQLManager().get_client()
         query = """
         SELECT EXISTS (
             SELECT 1 
@@ -23,12 +23,9 @@ class TransactionManager(metaclass=Singleton):
             AND TABLE_NAME = 'transactions'
         ) AS table_exists;
         """
-        with self.client.get_cursor() as cursor:
-            cursor.execute(query)
-            exists = cursor.fetchone()["table_exists"]
-            print(f"Table : transaction sync check = {exists}")
-            if not exists:
-                self.create()
+        exists = self.client.execute_with_select_one(dict, query)["table_exists"]
+        if not exists:
+            self.create()
 
     def create(self):
         #db생성 함수
@@ -53,12 +50,9 @@ class TransactionManager(metaclass=Singleton):
             margin FLOAT NULL
         );
         """
+        self.client.execute_with_commit(query)
         query2 = "CREATE INDEX idx_order_status ON transactions(order_status);"
-        with self.client.get_cursor() as cursor:
-            cursor.execute(query)
-            self.client.commit()
-            cursor.execute(query2)
-            self.client.commit()
+        self.client.execute_with_commit(query2)
 
     def bid_placed(self, bid_uuid, bid_created_at, bid_price, tether_volume, bid_krw, bid_fee):
         #새로운 포지션을 잡았을 때 쓰는 함수. 
@@ -71,9 +65,7 @@ class TransactionManager(metaclass=Singleton):
         INSERT INTO transactions (bid_uuid, bid_created_at, bid_price, bid_krw, bid_fee, tether_volume)
         VALUES ("{bid_uuid}", "{bid_created_at}", {bid_price}, {bid_krw}, {bid_fee}, {tether_volume})
         """
-        with self.client.get_cursor() as cursor:
-            cursor.execute(query)
-            self.client.commit()
+        self.client.execute_with_commit(query)
 
     def bid_filled(self, bid_uuid, bid_filled_at):
         #어느 포지션을 매수 주문이 체결되었을 때 쓰는 함수. (bid_uuid) 상응하는 매수 포지션의 uuid가 필요함. 
@@ -86,9 +78,7 @@ class TransactionManager(metaclass=Singleton):
             bid_filled_at = "{bid_filled_at}"
         WHERE bid_uuid = "{bid_uuid}"
         """
-        with self.client.get_cursor() as cursor:
-            cursor.execute(query)
-            self.client.commit()
+        self.client.execute_with_commit(query)
     
     def ask_placed(self, bid_uuid, ask_uuid, ask_created_at, ask_price, ask_fee):
         #어느 포지션을 매도 주문했을 때 쓰는 함수. (bid_uuid) 
@@ -108,9 +98,7 @@ class TransactionManager(metaclass=Singleton):
             margin = ({ask_price} * tether_volume) - (bid_price * tether_volume) - bid_fee - ask_fee
         WHERE bid_uuid = "{bid_uuid}"
         """
-        with self.client.get_cursor() as cursor:
-            cursor.execute(query)
-            self.client.commit()
+        self.client.execute_with_commit(query)
 
     def ask_filled(self, ask_uuid, ask_filled_at):
         #매도 체결시 쓰는 함수
@@ -123,9 +111,7 @@ class TransactionManager(metaclass=Singleton):
             ask_filled_at = "{ask_filled_at}"
         WHERE ask_uuid = "{ask_uuid}"
         """
-        with self.client.get_cursor() as cursor:
-            cursor.execute(query)
-            self.client.commit()
+        self.client.execute_with_commit(query)
 
     def get_transactions_by_status(self, state) -> List[Transaction]:
         #매수 주문만 들어간 기록 찾을 땐 get_transactions_by_status(OrderStatus.BID_PLACED)
@@ -136,22 +122,13 @@ class TransactionManager(metaclass=Singleton):
         WHERE order_status = "{state}"
         ORDER BY bid_created_at ASC;
         """
-        with self.client.get_cursor() as cursor:
-            cursor.execute(query)
-            result = cursor.fetchall()
-            print("result", result)
-            dtos = [Transaction(**row) for row in result]
-        return dtos
+        result = self.client.execute_with_select(Transaction, query)
+        return result
 
     def get_transaction_by_bid_uuid(self, bid_uuid) -> Optional[Transaction]:
         query = f"""
         SELECT * FROM transactions
         WHERE bid_uuid = "{bid_uuid}"
         """
-        with self.client.get_cursor() as cursor:
-            cursor.execute(query)
-            row = cursor.fetchone()
-            print("row = ", row)
-            if row is None:
-                return None;
-        return Transaction(**row)
+        result = self.client.execute_with_select_one(Transaction, query)
+        return result
