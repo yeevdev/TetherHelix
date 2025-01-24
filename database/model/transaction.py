@@ -55,22 +55,22 @@ class TransactionManager(metaclass=Singleton):
         #bid_fee = 수수료
         query = f"""
         INSERT INTO transactions (bid_uuid, bid_created_at, bid_price, bid_krw, bid_fee, tether_volume)
-        VALUES ("{bid_uuid}", "{bid_created_at}", {bid_price}, {bid_krw}, {bid_fee}, {tether_volume})
+        VALUES (?, ?, ?, ?, ?, ?)
         """
-        self.client.execute_with_commit(query)
+        self.client.execute_with_commit(query, (bid_uuid, bid_created_at, bid_price, bid_krw, bid_fee, tether_volume, ))
 
     def bid_filled(self, bid_uuid, bid_filled_at):
         #어느 포지션을 매수 주문이 체결되었을 때 쓰는 함수. (bid_uuid) 상응하는 매수 포지션의 uuid가 필요함. 
         #bid_uuid = 매수 거래 uuid
         #bid_filled_at = 매수 체결 시점
-        query = f"""
+        query = """
         UPDATE transactions
         SET
             order_status = 2,
-            bid_filled_at = "{bid_filled_at}"
-        WHERE bid_uuid = "{bid_uuid}"
+            bid_filled_at = ?
+        WHERE bid_uuid = ?
         """
-        self.client.execute_with_commit(query)
+        self.client.execute_with_commit(query, (bid_filled_at, bid_uuid, ))
     
     def ask_placed(self, bid_uuid, ask_uuid, ask_created_at, ask_price, ask_fee):
         #어느 포지션을 매도 주문했을 때 쓰는 함수. (bid_uuid) 
@@ -79,48 +79,49 @@ class TransactionManager(metaclass=Singleton):
         #ask_created_at = 거래 
         #ask_price = 얼마에 팜?
         #ask_fee = 수수료
-        query = f"""
+        query = """
         UPDATE transactions
         SET
             order_status = 3,
-            ask_uuid = "{ask_uuid}",
-            ask_created_at = "{ask_created_at}",
-            ask_price = {ask_price},
-            ask_fee = {ask_fee},
-            margin = ({ask_price} * tether_volume) - (bid_price * tether_volume) - bid_fee - ask_fee
-        WHERE bid_uuid = "{bid_uuid}"
+            ask_uuid = ?,
+            ask_created_at = ?,
+            ask_price = ?,
+            ask_fee = ?,
+            margin = (? * tether_volume) - (bid_price * tether_volume) - bid_fee - ask_fee
+        WHERE bid_uuid = ?
         """
-        self.client.execute_with_commit(query)
+        self.client.execute_with_commit(query, (ask_uuid, ask_created_at, ask_price, ask_fee, ask_price, bid_uuid, ))
 
     def ask_filled(self, ask_uuid, ask_filled_at):
         #매도 체결시 쓰는 함수
         #ask_uuid = 매도 거래 uuid
         #ask_filled_at = 매도 거래 체결 일시
-        query = f"""
+        query = """
         UPDATE transactions
         SET
             order_status = 4,
-            ask_filled_at = "{ask_filled_at}"
-        WHERE ask_uuid = "{ask_uuid}"
+            ask_filled_at = ?
+        WHERE ask_uuid = ?
         """
-        self.client.execute_with_commit(query)
+        self.client.execute_with_commit(query, (ask_filled_at, ask_uuid, ))
 
     def get_transactions_by_status(self, state: OrderStatus) -> List[Transaction]:
         #매수 주문만 들어간 기록 찾을 땐 get_transactions_by_status(OrderStatus.BID_PLACED)
         #매수 체결 까지 된 기록 찾을 땐 get_transactions_by_status(OrderStatus.BID_FILLED)
         #...이런 식으로 이용하면 Transaction 데이터가 들어있는 리스트를 반환합니다.
-        query = f"""
+        state = int(state)
+        query = """
         SELECT * FROM transactions
-        WHERE order_status = {int(state)}
+        WHERE order_status = ?
         ORDER BY bid_created_at ASC;
         """
-        result = self.client.execute_with_select(Transaction, query)
+        result = self.client.execute_with_select(Transaction, query, (state, ))
         return result
 
     def get_transaction_by_bid_uuid(self, bid_uuid) -> Optional[Transaction]:
-        query = f"""
+        query = """
         SELECT * FROM transactions
-        WHERE bid_uuid = "{bid_uuid}"
+        WHERE bid_uuid = ?
         """
-        result = self.client.execute_with_select_one(Transaction, query)
+        result = self.client.execute_with_select_one(Transaction, query, (bid_uuid, ))
         return result

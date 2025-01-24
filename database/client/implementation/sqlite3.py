@@ -14,33 +14,42 @@ class SQLite3Client(SQLClient):
     def check_table_exists(self, table_name):
         query = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name=?;"
         cursor = self.connection.cursor()
-        cursor.execute(query, (table_name, )) #this back tick is needed, so do not remove this...
+        cursor.execute(query, (table_name, )) #this comma is needed, so do not remove this...
         result = cursor.fetchone()[0]
         print(f"Sync check sqlite3 table[{table_name}] exists state :{result}")
         cursor.close()
         return result
 
-    def execute_with_select_one(self, cls: Type[T], query) -> Optional[T]:
+    def execute_with_select_one(self, cls: Type[T], query: str, args: Optional[tuple]) -> Optional[T]:
         self.connection.row_factory = sqlite3.Row
         cursor = self.connection.cursor()
-        cursor.execute(query)
+        if args:
+            cursor.execute(query, (*args, ))
+        else:
+            cursor.execute(query)
         result = cursor.fetchone()
         dto = cls(**result)
         cursor.close()
         return dto
 
-    def execute_with_select(self, cls: Type[T], query) -> List[T]:
+    def execute_with_select(self, cls: Type[T], query: str, args: Optional[tuple]) -> List[T]:
         self.connection.row_factory = sqlite3.Row
         cursor = self.connection.cursor()
-        cursor.execute(query)
+        if args:
+            cursor.execute(query, (*args,))
+        else:
+            cursor.execute(query)
         result = cursor.fetchall()
         dtos = [cls(**row) for row in result]
         cursor.close()
         return dtos
 
-    def execute_with_commit(self, query) -> None:
+    def execute_with_commit(self, query: str, args: Optional[tuple]) -> None:
         cursor = self.connection.cursor()
-        cursor.execute(query)
+        if args:
+            cursor.execute(query, (*args,))
+        else:
+            cursor.execute(query)
         self.connection.commit()
         cursor.close()
     

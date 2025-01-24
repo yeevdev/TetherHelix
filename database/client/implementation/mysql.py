@@ -17,6 +17,9 @@ class MySQLClient(SQLClient):
             database=mysql_database,
             cursorclass=pymysql.cursors.DictCursor)
         
+    def convert_placeholders(self, query: str) -> str:
+        return query.replace("?", "%s")
+        
     def check_table_exists(self, table_name) -> bool:
         query = """
         SELECT EXISTS (
@@ -31,23 +34,26 @@ class MySQLClient(SQLClient):
             exists = cursor.fetchone()["table_exists"]
         return exists
 
-    def execute_with_select_one(self, cls: Type[T], query) -> Optional[T]:
-        result = self.execute_with_select(cls, query)
-        if len(result) > 0:
-            return result[0]
-        else:
-            return None 
-
-    def execute_with_select(self, cls: Type[T], query) -> List[T]:
+    def execute_with_select_one(self, cls: Type[T], query: str, args: Optional[tuple]) -> Optional[T]:
+        query = self.convert_placeholders(query)
         with self.connection.cursor() as cursor:
-            cursor.execute(query)
+            cursor.execute(query, args)
+            result = cursor.fetchone()
+            dto = cls(**result)
+        return dto
+
+    def execute_with_select(self, cls: Type[T], query: str, args: Optional[tuple]) -> List[T]:
+        query = self.convert_placeholders(query)
+        with self.connection.cursor() as cursor:
+            cursor.execute(query, args)
             result = cursor.fetchall()
             dtos = [cls(**row) for row in result]
         return dtos
 
-    def execute_with_commit(self, query) -> None:
+    def execute_with_commit(self, query: str, args: Optional[tuple]) -> None:
+        query = self.convert_placeholders(query)
         with self.connection.cursor() as cursor:
-            cursor.execute(query)
+            cursor.execute(query, args)
             self.connection.commit()
     
     def close(self):
