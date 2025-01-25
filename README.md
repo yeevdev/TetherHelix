@@ -4,15 +4,25 @@ An automated Upbit trading bot that leverages real-time data and customizable st
 ## Stack
 
 ![Tether](https://img.shields.io/badge/tether-168363?style=for-the-badge&logo=tether&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
+![MySQL](https://img.shields.io/badge/mysql-%234479A1.svg?&style=for-the-badge&logo=mysql&logoColor=white)
+![SQLite3](https://img.shields.io/badge/sqlite-%23003B57.svg?&style=for-the-badge&logo=sqlite&logoColor=white)
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 
-### Use python virtual environment
+### How to execute?
 
+For pycharm users, skip to number 2.
+
+At the terminal(UNIX/LINUX supported)
+1. enableing python virtual environment + requirements.txt installation
 ```
-python -m venv tetherhelix_env
-source tetherhelix_env/bin/activate  # (Mac/Linux)
-tetherhelix_env\Scripts\activate     # (Windows)
+./tetherenv.sh -e
+source .venv/bin/activate
+```
+2. launch
+```
+./tetherenv.sh run
+# or just simply
+python3 ./main.py
 ```
 
 ## CI management
