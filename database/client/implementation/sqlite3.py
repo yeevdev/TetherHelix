@@ -1,8 +1,8 @@
 import sqlite3
-
 from typing import Optional, List, TypeVar, Type
-from environments.variables import SQLITE3_DATABASE
+
 from database.client.sql_client import SQLClient
+from environments.variables import SQLITE3_DATABASE
 
 T = TypeVar("T")
 
