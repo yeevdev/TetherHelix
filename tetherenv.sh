@@ -34,5 +34,5 @@ elif { [ "$1" == "-e" ] || [ "$1" == "--enable" ]; }; then
 elif { [ "$1" == "run" ]; }; then
     python3 -m venv .venv && source .venv/bin/activate
     echo "Starting src/main.py...(venv)"
-    python src/main.py
+    python3 main.py
 fi
