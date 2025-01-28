@@ -1,19 +1,16 @@
 import asyncio
-import datetime
 import logging
-from zoneinfo import ZoneInfo
 
-import pyupbit
-
-import trading.bot_lagacy
+import trading.bot
 import trading.trade
 from environments.variables import UPBIT_ACCESS_KEY
 from environments.variables import UPBIT_SECRET_KEY
 
-
 TICKER = "KRW-USDT"
 BUY_QUANTITY = 5.0
 STEP = 1
+INTERVAL = 1
+TIMEOUT = 30
 
 
 def get_logger():
@@ -23,10 +20,11 @@ def get_logger():
 
     return logging.getLogger()
 
+
 def main():
-    # bot = trading.bot.TradingBot(UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY)
+    bot = trading.bot.TradingBot(UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY)
     # upbit = pyupbit.Upbit(UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY)
-    # asyncio.run(bot.run())
+    asyncio.run(bot.run())
     # asyncio.run(trading.trade.buy(upbit, "KRW-USDT", 1503, 5))
     pass
 

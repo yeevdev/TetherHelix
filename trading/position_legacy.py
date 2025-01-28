@@ -7,6 +7,5 @@ class Position:
         self.created_at = created_at
         self.is_open = True
 
-
     def close(self):
         self.is_open = False

@@ -19,11 +19,11 @@ async def buy(upbit: pyupbit.Upbit, ticker, price, volume):
         # 매수 주문 생성
         order = upbit.buy_limit_order(ticker, price, volume)
         if not order:
-            raise RuntimeError("주문 생성 실패")
+            raise RuntimeError("orderIsNone")
 
         order_uuid = order.get("uuid")
         if not order_uuid:
-            raise RuntimeError("주문 생성 실패")
+            raise RuntimeError("uuidIsNone")
 
         logger.info(f"매수 주문 생성 (가격: {price}, 수량: {volume}, uuid: {order_uuid})")
         return order_uuid
@@ -49,11 +49,11 @@ async def sell(upbit: pyupbit.Upbit, ticker, price, volume):
         # 매도 주문 생성
         order = upbit.sell_limit_order(ticker, price, volume)
         if not order:
-            raise RuntimeError("주문 생성 실패")
+            raise RuntimeError("orderIsNone")
 
         order_uuid = order.get("uuid")
         if not order_uuid:
-            raise RuntimeError("주문 생성 실패")
+            raise RuntimeError("uuidIsNone")
 
         logger.info(f"매도 주문 생성 (가격: {price}, 수량: {volume}, uuid: {order_uuid})")
         return order_uuid
@@ -61,4 +61,3 @@ async def sell(upbit: pyupbit.Upbit, ticker, price, volume):
     except RuntimeError as e:
         logger.error(f"주문 생성 중 오류 발생: {e}")
         return False
-

@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from datetime import datetime
+from datetime import timezone
 from typing import List
-from zoneinfo import ZoneInfo
-from main import get_logger
+
+from main import *
 
 
 @dataclass
@@ -11,7 +12,6 @@ class Position:
     entry_price: float
     volume: float
     created_at: str = ""
-    is_open: bool = True
     target_price: float = 0.0
 
 
@@ -27,16 +27,14 @@ class PositionManager:
             cls._instance = PositionManager()
         return cls._instance
 
-
     def create_position(self, order_uuid, entry_price, volume):
         position = Position(order_uuid=order_uuid, entry_price=entry_price, volume=volume)
-        position.target_price = position.entry_price + 1  # 목표가격
+        position.target_price = position.entry_price + STEP  # 목표가격
 
-        time = datetime.now(ZoneInfo("Asia/Seoul"))
+        time = datetime.now(timezone("Asia/Seoul"))
         position.created_at = time.strftime("%Y-%m-%dT%H:%M:%S")
 
         self.positions.append(position)
-
 
     def remove_position(self, position):
         try:
@@ -45,14 +43,12 @@ class PositionManager:
         except ValueError as e:
             get_logger().error(f"포지션 삭제 중 오류 발생: {e}")
 
-
     def get_position_by_uuid(self, order_uuid):
         for position in self.positions:
             if position.order_uuid == order_uuid:
                 return position
 
         return None
-
 
     def get_position_by_target_price(self, target_price):
         for position in self.positions:
@@ -61,10 +57,16 @@ class PositionManager:
 
         return None
 
-
     def is_positions_empty(self):
         return True if not self.positions else False
 
-
     def get_last_position(self):
         return self.positions[-1] if self.positions[-1] else None
+
+    def update_position(self, position: Position, order):
+        if order.get("side") == "bid":
+            if abs(position.volume - order.get("executed_volume")) <= 1e-9:
+                position.volume = order.get("executed_volume")
+        elif order.get("side") == "ask":
+            if abs(position.volume - order.get("executed_volume")) <= 1e-9:
+                position.volume -= order.get("executed_volume")

@@ -23,7 +23,6 @@ class TradingBot:
 
         self.positions = []
 
-
     async def run(self):
         while True:
             try:
@@ -40,7 +39,6 @@ class TradingBot:
                 pass
             except RuntimeError as e:
                 pass
-
 
     def check_buy(self) -> bool:
         """
@@ -79,7 +77,6 @@ class TradingBot:
         self.logger.info(f"매도 조건 미충족: 현재 가격({current_price}) < 마지막 진입 가격({last_position.entry_price}) + 1")
         return False
 
-
     async def open_position(self, price, volume, order_uuid):
         try:
             position = Position(
@@ -98,7 +95,6 @@ class TradingBot:
 
     async def update_position(self, position):
         position.volume = self.upbit.get_order(position.order_uuid).get("executed_volume")
-
 
     async def try_buy(self, price: float, volume):
         try:
@@ -135,7 +131,6 @@ class TradingBot:
             asyncio.create_task(self.monitor_order(order_uuid, check_interval=1.0, timeout=30.0))
         except RuntimeError as e:
             self.logger.error(f"매도 주문 중 오류 발생: {e}")
-
 
     async def monitor_order(self, order_uuid, check_interval, timeout):
         order = self.upbit.get_order(order_uuid)
