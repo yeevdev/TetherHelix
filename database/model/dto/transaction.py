@@ -16,6 +16,6 @@ class Transaction:
     ask_price: Optional[float]
     ask_fee: Optional[float]
 
-    order_status: str
+    order_status: int
     tether_volume: float
     margin: Optional[float]
