@@ -1,7 +1,7 @@
 
 
-from typing import List, Optional, Type, TypeVar
 from abc import ABC, abstractmethod
+from typing import List, Optional, Type, TypeVar
 
 T = TypeVar("T")
 

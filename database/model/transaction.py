@@ -1,8 +1,10 @@
+from typing import List, Optional;
+
 from database.client.manager import SQLManager
 from database.client.sql_client import SQLClient
 from database.model.dto.transaction import Transaction;
-from typing import List, Optional;
 from util import Singleton;
+
 
 class OrderStatus:
     BID_PLACED = 1

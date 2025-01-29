@@ -1,10 +1,10 @@
-import pymysql
-import pymysql.cursors
 from typing import List, Optional, TypeVar, Type
 
-from environments.variables import MYSQL_HOST, MYSQL_ID, MYSQL_PASSWORD, MYSQL_DATABASE
+import pymysql
+import pymysql.cursors
 
 from database.client.sql_client import SQLClient
+from environments.variables import MYSQL_HOST, MYSQL_ID, MYSQL_PASSWORD, MYSQL_DATABASE
 
 T = TypeVar("T")
 

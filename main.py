@@ -1,14 +1,28 @@
-import uvicorn
-from api.transaction import router as transaction_router 
-from fastapi import FastAPI
+import asyncio
+import logging
 
-app = FastAPI()
+import trading.bot
+import trading.trade
+from environments.variables import UPBIT_ACCESS_KEY
+from environments.variables import UPBIT_SECRET_KEY
 
-app.include_router(transaction_router)
+TICKER = "KRW-USDT"
+BUY_QUANTITY = 5.0
+STEP = 1
+INTERVAL = 1
+TIMEOUT = 30
 
-@app.get("/")
-def read_root():
-    return {"message": "FastAPI is running!"}
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+def get_logger():
+    my_logger = logging.getLogger()
+    my_logger.setLevel(logging.INFO)
+    my_logger.addHandler(logging.FileHandler("test.log"))
+
+    return logging.getLogger()
+
+def main():
+    bot = trading.bot.TradingBot(UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY)
+    # upbit = pyupbit.Upbit(UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY)
+    asyncio.run(bot.run())
+    # asyncio.run(trading.trade.buy(upbit, "KRW-USDT", 1503, 5))
+    pass
