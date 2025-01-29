@@ -120,13 +120,12 @@ class TransactionManager(metaclass=Singleton):
     
     def get_transactions_unfinished(self) -> List[Transaction]:
         #매도 체결까지 되지 않은 모든 거래를 불러옵니다.
-        state = int(state)
         query = """
         SELECT * FROM transactions
         WHERE order_status = 1 OR order_status = 2 OR order_status = 3
         ORDER BY bid_created_at ASC;
         """
-        result = self.client.execute_with_select(Transaction, query, (state, ))
+        result = self.client.execute_with_select(Transaction, query)
         return result
 
     def get_transaction_by_bid_uuid(self, bid_uuid) -> Optional[Transaction]:
