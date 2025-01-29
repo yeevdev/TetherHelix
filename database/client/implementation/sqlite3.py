@@ -20,7 +20,7 @@ class SQLite3Client(SQLClient):
         cursor.close()
         return result
 
-    def execute_with_select_one(self, cls: Type[T], query: str, args: Optional[tuple]) -> Optional[T]:
+    def execute_with_select_one(self, cls: Type[T], query: str, args: tuple = ()) -> Optional[T]:
         self.connection.row_factory = sqlite3.Row
         cursor = self.connection.cursor()
         if args:
@@ -32,7 +32,7 @@ class SQLite3Client(SQLClient):
         cursor.close()
         return dto
 
-    def execute_with_select(self, cls: Type[T], query: str, args: Optional[tuple]) -> List[T]:
+    def execute_with_select(self, cls: Type[T], query: str, args: tuple = ()) -> List[T]:
         self.connection.row_factory = sqlite3.Row
         cursor = self.connection.cursor()
         if args:
@@ -44,7 +44,7 @@ class SQLite3Client(SQLClient):
         cursor.close()
         return dtos
 
-    def execute_with_commit(self, query: str, args: Optional[tuple]) -> None:
+    def execute_with_commit(self, query: str, args: tuple = ()) -> None:
         cursor = self.connection.cursor()
         if args:
             cursor.execute(query, (*args,))

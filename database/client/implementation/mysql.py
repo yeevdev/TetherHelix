@@ -34,7 +34,7 @@ class MySQLClient(SQLClient):
             exists = cursor.fetchone()["table_exists"]
         return exists
 
-    def execute_with_select_one(self, cls: Type[T], query: str, args: Optional[tuple]) -> Optional[T]:
+    def execute_with_select_one(self, cls: Type[T], query: str, args: tuple = ()) -> Optional[T]:
         query = self.convert_placeholders(query)
         with self.connection.cursor() as cursor:
             cursor.execute(query, args)
@@ -42,7 +42,7 @@ class MySQLClient(SQLClient):
             dto = cls(**result)
         return dto
 
-    def execute_with_select(self, cls: Type[T], query: str, args: Optional[tuple]) -> List[T]:
+    def execute_with_select(self, cls: Type[T], query: str, args: tuple = ()) -> List[T]:
         query = self.convert_placeholders(query)
         with self.connection.cursor() as cursor:
             cursor.execute(query, args)
@@ -50,7 +50,7 @@ class MySQLClient(SQLClient):
             dtos = [cls(**row) for row in result]
         return dtos
 
-    def execute_with_commit(self, query: str, args: Optional[tuple]) -> None:
+    def execute_with_commit(self, query: str, args: tuple = ()) -> None:
         query = self.convert_placeholders(query)
         with self.connection.cursor() as cursor:
             cursor.execute(query, args)
