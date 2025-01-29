@@ -1,10 +1,12 @@
-import pytest
 import os
 
-from database.model.transaction import TransactionManager
+import pytest
+
 from database.client.implementation.mysql import MySQLClient
 from database.client.implementation.sqlite3 import SQLite3Client
 from database.client.manager import SQLManager
+from database.model.transaction import TransactionManager
+
 
 def pytest_addoption(parser):
     parser.addoption("--db", action="store", default="sqlite", help="Choose database: sqlite or mysql")
