@@ -1,8 +1,8 @@
 import uvicorn
-from api.transaction import router as transaction_router 
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from api.transaction import router as transaction_router
 
 app = FastAPI()
 

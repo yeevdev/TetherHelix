@@ -1,11 +1,11 @@
 import time
 
 import pyupbit
-from util.logger import Logger
 
 from main import *
 from trading.position import PositionManager, Position
 from trading.trade import buy, sell
+from util.logger import Logger
 
 
 class TradingBot:

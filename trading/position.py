@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
-from datetime import timezone
-from multiprocessing.util import get_logger
 from typing import List
 from zoneinfo import ZoneInfo
 
 from main import *
+
 
 @dataclass
 class Position:

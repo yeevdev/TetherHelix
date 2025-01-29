@@ -1,11 +1,10 @@
 import asyncio
-import logging
 
 import trading.bot
 import trading.trade
 from environments.variables import UPBIT_ACCESS_KEY
 from environments.variables import UPBIT_SECRET_KEY
-from util.logger import Loggeㅇㄹ
+
 TICKER = "KRW-USDT"
 BUY_QUANTITY = 5.0
 STEP = 1
