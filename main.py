@@ -20,14 +20,9 @@ def get_logger():
 
     return logging.getLogger()
 
-
 def main():
     bot = trading.bot.TradingBot(UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY)
     # upbit = pyupbit.Upbit(UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY)
     asyncio.run(bot.run())
     # asyncio.run(trading.trade.buy(upbit, "KRW-USDT", 1503, 5))
     pass
-
-
-if __name__ == '__main__':
-    main()

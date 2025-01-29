@@ -7,15 +7,15 @@ T = TypeVar("T")
 
 class SQLClient(ABC):
     @abstractmethod
-    def execute_with_select_one(self, cls: Type[T], query: str, args: Optional[tuple]) -> Optional[T]:
+    def execute_with_select_one(self, cls: Type[T], query: str, args: tuple = ()) -> Optional[T]:
         pass
 
     @abstractmethod
-    def execute_with_select(self, cls: Type[T], query: str, args: Optional[tuple]) -> List[T]:
+    def execute_with_select(self, cls: Type[T], query: str, args: tuple = ()) -> List[T]:
         pass
 
     @abstractmethod
-    def execute_with_commit(self, query, args: Optional[tuple]) -> None:
+    def execute_with_commit(self, query, args: tuple = ()) -> None:
         pass
 
     @abstractmethod
