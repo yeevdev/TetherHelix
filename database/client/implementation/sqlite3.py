@@ -4,11 +4,13 @@ from typing import Optional, List, TypeVar, Type
 from database.client.sql_client import SQLClient
 from environments.variables import SQLITE3_DATABASE
 
+from util.logger import Logger
+
 T = TypeVar("T")
 
 class SQLite3Client(SQLClient):
     def __init__(self, dbname=SQLITE3_DATABASE):
-        print(f"SQLite3 Client : db-[{dbname}]")
+        Logger.get_logger().info(f"SQLite3 Client : db-[{dbname}]")
         self.connection = sqlite3.connect(dbname)
     
     def check_table_exists(self, table_name):
@@ -16,7 +18,7 @@ class SQLite3Client(SQLClient):
         cursor = self.connection.cursor()
         cursor.execute(query, (table_name, )) #this comma is needed, so do not remove this...
         result = cursor.fetchone()[0]
-        print(f"Sync check sqlite3 table[{table_name}] exists state :{result}")
+        Logger.get_logger().info(f"Sync check sqlite3 table[{table_name}] exists state :{result}")
         cursor.close()
         return result
 

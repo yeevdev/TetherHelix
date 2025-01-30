@@ -6,11 +6,13 @@ import pymysql.cursors
 from database.client.sql_client import SQLClient
 from environments.variables import MYSQL_HOST, MYSQL_ID, MYSQL_PASSWORD, MYSQL_DATABASE
 
+from util.logger import Logger
+
 T = TypeVar("T")
 
 class MySQLClient(SQLClient):
     def __init__(self, mysql_host=MYSQL_HOST, mysql_user=MYSQL_ID, mysql_password=MYSQL_PASSWORD, mysql_database=MYSQL_DATABASE):
-        print(f"MySQL Client : host-[{mysql_host}] database-[{mysql_database}]")
+        Logger.get_logger().info(f"MySQL Client : host-[{mysql_host}] database-[{mysql_database}]")
         self.connection = pymysql.connect(host=mysql_host,
             user=mysql_user,
             password=mysql_password,
