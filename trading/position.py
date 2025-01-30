@@ -38,6 +38,8 @@ class PositionManager:
             ask_order_uuid=tr.ask_uuid if tr.ask_uuid else "",
             target_price=tr.ask_price if tr.ask_price else 0.0
         ) for tr in transactions]
+        for pos in self.positions:
+            Logger.get_logger().info(f"포지션 다시 세팅 entry:{pos.entry_price} uuid:{pos.bid_order_uuid}")
 
     def create_position(self, order_uuid, entry_price, volume):
         position = Position(bid_order_uuid=order_uuid, entry_price=entry_price, volume=volume)

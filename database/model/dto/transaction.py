@@ -8,6 +8,9 @@ class Transaction:
     bid_price: float
     bid_krw: float
     bid_fee: float 
+    bid_failed: int
+
+    ask_failed: int
 
     order_status: int
     tether_volume: float 
@@ -20,4 +23,4 @@ class Transaction:
     ask_price: Optional[float] = None
     ask_fee: Optional[float] = None
 
-    margin: Optional[float] = None
+    revenue: Optional[float] = None

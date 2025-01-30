@@ -9,7 +9,7 @@ from util.singleton import Singleton
 
 from util.logger import Logger
 class SQLManager(metaclass=Singleton):
-    def __init__(self, client_override=Optional[SQLClient]):
+    def __init__(self, client_override:Optional[SQLClient] = None):
         Logger.get_logger().info(f"SQLManager Mode : {SQL_MODE()}, override : {client_override}")
         if SQL_MODE() == "MySQL":
             self.client = MySQLClient()
