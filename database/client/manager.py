@@ -5,7 +5,7 @@ from database.client.implementation.mysql import MySQLClient
 from database.client.implementation.sqlite3 import SQLite3Client
 from database.client.sql_client import SQLClient
 from environments.variables import SQL_MODE
-from util import Singleton
+from util.singleton import Singleton
 
 
 class SQLManager(metaclass=Singleton):
