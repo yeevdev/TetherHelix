@@ -7,12 +7,14 @@ from trading.position import PositionManager, Position
 from trading.trade import buy, sell
 from util.logger import Logger
 
+from database.model.transaction import TransactionManager
 
 class TradingBot:
 
     def __init__(self, access_key, secret_key):
         self.upbit = pyupbit.Upbit(access_key, secret_key)
         self.position_manager = PositionManager.get_position_manager()
+        self.transaction_database_manager = TransactionManager()
 
     async def run(self):
         while True:
@@ -58,8 +60,10 @@ class TradingBot:
             Logger.get_logger().info(f"포지션 진입 시도 - 가격:{price}, 수량:{volume}")
 
             order_uuid = await buy(self.upbit, TICKER, price, volume)
+            
             if not order_uuid:
                 raise RuntimeError("buyOrderIsFalse")
+            self.transaction_database_manager.bid_placed(order_uuid, price, volume)
 
             # 주문 모니터링
             elapsed_time = 0.0
@@ -89,6 +93,7 @@ class TradingBot:
                 if order.get("state") == "done":
                     pos = self.position_manager.get_position_by_uuid(order_uuid)
                     idx = self.position_manager.get_index_by_pos(pos)
+                    self.transaction_database_manager.bid_filled(order_uuid, order.get("paid_fee"))
 
                     Logger.get_logger().info(f"포지션 진입 완료 - {idx+1}번 포지션  진입가:{pos.entry_price} 목표가:{pos.target_price} 수량:{pos.volume}")
                     return
@@ -101,12 +106,14 @@ class TradingBot:
                 # 주문취소 임계가격 확인
                 if pyupbit.get_current_price(TICKER) >= threshold_price:
                     self.upbit.cancel_order(order_uuid)
+                    self.transaction_database_manager.order_failed_after_bid_placed(order_uuid)
 
                 await asyncio.sleep(INTERVAL)
 
             remain_vol = volume - float(self.upbit.get_order(order_uuid).get("executed_volume"))
             Logger.get_logger().info(f"TIMEOUT에 의한 주문 취소 - 남은수량: {remain_vol}")
             self.upbit.cancel_order(order_uuid)
+            self.transaction_database_manager.order_failed_after_bid_placed(order_uuid)
 
         except Exception as e:
             Logger.get_logger().error(f"오류 발생: {e}")
@@ -119,6 +126,7 @@ class TradingBot:
             if not order_uuid:
                 raise RuntimeError("sellOrderIsFalse")
             position.ask_order_uuid = order_uuid
+            self.transaction_database_manager.ask_placed(position.bid_order_uuid, order_uuid, position.target_price)
 
             # 주문 모니터링
             elapsed_time = 0.0
@@ -148,6 +156,8 @@ class TradingBot:
                     total_revenue = (round((executed_volume * position.target_price) - sell_fee)
                                      - round((executed_volume * position.entry_price) + buy_fee))
 
+                    self.transaction_database_manager.ask_filled(order_uuid, sell_fee, total_revenue)
+
                     Logger.get_logger().info(f"포지션 종료 완료 - {idx+1}번 포지션  "
                                              f"진입가:{position.entry_price} 목표가:{position.target_price} "
                                              f"수량:{position.volume} 수수료:{buy_fee+sell_fee} 수익:{total_revenue}")
@@ -164,11 +174,13 @@ class TradingBot:
                 # 주문취소 임계가격 확인
                 if pyupbit.get_current_price(TICKER) <= threshold_price:
                     self.upbit.cancel_order(order_uuid)
+                    self.transaction_database_manager.order_failed_after_ask_placed(order_uuid)
 
                 await asyncio.sleep(INTERVAL)
 
             Logger.get_logger().info(f"TIMEOUT에 의한 주문 취소 - 남은수량: {position.volume}")
             self.upbit.cancel_order(order_uuid)
+            self.transaction_database_manager.order_failed_after_ask_placed(order_uuid)
 
         except Exception as e:
             Logger.get_logger().error(f"오류 발생: {e}")
