@@ -36,7 +36,7 @@ class PositionManager:
             volume=tr.tether_volume,
             created_at=convert_iso_to_general(tr.bid_created_at),
             ask_order_uuid=tr.ask_uuid if tr.ask_uuid else "",
-            target_price=tr.ask_price if tr.ask_price else 0.0
+            target_price=tr.bid_price + STEP
         ) for tr in transactions]
         for pos in self.positions:
             Logger.get_logger().info(f"포지션 다시 세팅 entry:{pos.entry_price} uuid:{pos.bid_order_uuid}")
