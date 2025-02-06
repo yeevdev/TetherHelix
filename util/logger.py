@@ -1,4 +1,5 @@
 import logging
+import os
 from datetime import datetime
 
 
@@ -12,7 +13,11 @@ class Logger:
         formatter = logging.Formatter("[%(asctime)s][%(levelname)-7s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_filename = f"{current_time}.log"
+
+        log_dir = "./logs"
+        os.makedirs(log_dir, exist_ok=True)
+
+        log_filename = log_dir + f"/{current_time}.log"
         file_handler = logging.FileHandler(log_filename, encoding="UTF-8")
         file_handler.setFormatter(formatter)
 
