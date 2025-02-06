@@ -157,13 +157,17 @@ class TransactionManager(metaclass=Singleton):
         """
         self.client.execute_with_commit(query, (ask_uuid, ))
     
-    def get_transactions_unfinished(self) -> List[TransactionData]:
+    def get_transactions_unfinished(self, order_by: str) -> List[TransactionData]:
         #매도 체결까지 되지 않은 모든 거래를 불러옵니다.
-        query = """
+        if order_by == "desc":
+            order_by = "DESC"
+        else:
+            order_by = "ASC"
+        query = f"""
         SELECT * FROM transactions
         WHERE bid_failed = 0 AND ask_failed = 0 AND 
             (order_status = 1 OR order_status = 2 OR order_status = 3)
-        ORDER BY bid_created_at ASC;
+        ORDER BY bid_created_at {order_by};
         """
         result = self.client.execute_with_select(TransactionData, query)
         return result
