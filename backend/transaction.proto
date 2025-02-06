@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package tetherhelix_grpc;
+
+service Transaction {
+    rpc StreamMarketData(MarketRequest) returns (stream MarketResponse) {}
+}
+
+message MarketRequest {
+    string symbol = 1;
+}
+
+message MarketResponse {
+    string symbol = 1;
+    double price = 2;
+    double volume = 3;
+    string timestamp = 4;
+}
