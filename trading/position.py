@@ -3,7 +3,8 @@ from typing import List
 
 from main import *
 
-from database.model.transaction import TransactionManager, Transaction
+from database.model.transaction import TransactionManager
+from tetherhelix_grpc.transaction_pb2 import TransactionData
 from util.timestamp import generate_timestamp, convert_iso_to_general
 
 @dataclass
@@ -29,7 +30,7 @@ class PositionManager:
         return cls._instance
     
     def init_from_database(self):
-        transactions: List[Transaction] = TransactionManager().get_transactions_unfinished()
+        transactions: List[TransactionData] = TransactionManager().get_transactions_unfinished()
         self.positions = [Position(
             bid_order_uuid=tr.bid_uuid,
             entry_price=tr.bid_price,
