@@ -1,12 +1,11 @@
 from typing import List, Optional
 
-from database.client.manager import SQLManager
-from database.client.sql_client import SQLClient
-from database.model.dto.transaction import Transaction
+from database.sqlite3 import SQLite3Client
+
+from tetherhelix_grpc.transaction_pb2 import TransactionData
 
 from util.singleton import Singleton
 from util.timestamp import generate_isotimestamp
-
 from util.logger import Logger
 
 class OrderStatus:
@@ -16,10 +15,9 @@ class OrderStatus:
     ASK_FILLED = 4
 
 class TransactionManager(metaclass=Singleton):
-    client: SQLClient
 
     def __init__(self):
-        self.client: SQLClient = SQLManager().get_client()
+        self.client = SQLite3Client()
         exists = self.client.check_table_exists('transactions')
         if not exists:
             self.create()
@@ -66,13 +64,12 @@ class TransactionManager(metaclass=Singleton):
         #bid_price = 당시 tether 가격(포지션 금액 / 호가)
         #tether_volume = 얼마에 삼?
         #bid_fee = 수수료
-        bid_created_at = generate_isotimestamp()
         bid_krw = float(bid_price) * float(tether_volume)
         query = f"""
-        INSERT INTO transactions (bid_uuid, bid_created_at, bid_price, bid_krw, tether_volume)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO transactions (bid_uuid, bid_price, bid_krw, tether_volume)
+        VALUES (?, ?, ?, ?)
         """
-        self.client.execute_with_commit(query, (bid_uuid, bid_created_at, bid_price, bid_krw, tether_volume, ))
+        self.client.execute_with_commit(query, (bid_uuid, bid_price, bid_krw, tether_volume, ))
 
     def bid_filled(self, bid_uuid, bid_fee):
         #어느 포지션을 매수 주문이 체결되었을 때 쓰는 함수. (bid_uuid) 상응하는 매수 포지션의 uuid가 필요함. 
@@ -127,7 +124,7 @@ class TransactionManager(metaclass=Singleton):
         """
         self.client.execute_with_commit(query, (ask_filled_at, ask_fee, revenue, ask_uuid, ))
 
-    def get_transactions_by_status(self, state: OrderStatus) -> List[Transaction]:
+    def get_transactions_by_status(self, state: OrderStatus) -> List[TransactionData]:
         #매수 주문만 들어간 기록 찾을 땐 get_transactions_by_status(OrderStatus.BID_PLACED)
         #매수 체결 까지 된 기록 찾을 땐 get_transactions_by_status(OrderStatus.BID_FILLED)
         #...이런 식으로 이용하면 Transaction 데이터가 들어있는 리스트를 반환합니다.
@@ -137,7 +134,7 @@ class TransactionManager(metaclass=Singleton):
         WHERE order_status = ?
         ORDER BY bid_created_at ASC;
         """
-        result = self.client.execute_with_select(Transaction, query, (state, ))
+        result = self.client.execute_with_select(TransactionData, query, (state, ))
         return result
     
     def order_failed_after_bid_placed(self, bid_uuid):
@@ -160,7 +157,7 @@ class TransactionManager(metaclass=Singleton):
         """
         self.client.execute_with_commit(query, (ask_uuid, ))
     
-    def get_transactions_unfinished(self) -> List[Transaction]:
+    def get_transactions_unfinished(self) -> List[TransactionData]:
         #매도 체결까지 되지 않은 모든 거래를 불러옵니다.
         query = """
         SELECT * FROM transactions
@@ -168,17 +165,13 @@ class TransactionManager(metaclass=Singleton):
             (order_status = 1 OR order_status = 2 OR order_status = 3)
         ORDER BY bid_created_at ASC;
         """
-        result = self.client.execute_with_select(Transaction, query)
+        result = self.client.execute_with_select(TransactionData, query)
         return result
 
-    def get_transaction_by_bid_uuid(self, bid_uuid) -> Optional[Transaction]:
+    def get_transaction_by_timescope(self, start, end) -> Optional[TransactionData]:
         query = """
         SELECT * FROM transactions
-        WHERE bid_uuid = ?
+        WHERE ? <= transactions.bid_created_at AND transactions.bid_created_at < ?
         """
-        result = self.client.execute_with_select_one(Transaction, query, (bid_uuid, ))
+        result = self.client.execute_with_select_one(TransactionData, query, (start, end))
         return result
-    
-#for backend/api usage
-def get_transaction_manager():
-    return TransactionManager()
