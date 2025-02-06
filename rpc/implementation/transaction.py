@@ -21,7 +21,7 @@ class MyTransactionServicer(TransactionServicer):
         if not self.admin_manager.check_authenicated(request.db_auth):
             context.set_code(grpc.StatusCode.UNAUTHENTICATED)
             context.set_details("Failed to authenticate")
-        transactions = self.transaction_manager.get_transactions_unfinished()
+        transactions = self.transaction_manager.get_transactions_unfinished(request.order_by)
         Logger.get_logger().info(f"GetCurrentTransactions : Sample len({len(transactions)})")
         context.set_code(grpc.StatusCode.OK)
         return TransactionsResponse(transactions=transactions)
