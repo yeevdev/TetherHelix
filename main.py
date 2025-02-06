@@ -23,6 +23,6 @@ if __name__ == '__main__':
         Logger.get_logger().warning(f"********** TetherHelix 프로그램 시작 **********")
         main()
     except Exception as e:
-        pass
+        Logger.get_logger().warning(f"Catastropic Error / OOB : {e}")
     finally:
         Logger.get_logger().warning(f"********** TetherHelix 프로그램 종료 **********")
