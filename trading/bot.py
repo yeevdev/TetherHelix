@@ -2,10 +2,12 @@ import time
 
 import pyupbit
 
-from main import *
+import asyncio
+
 from trading.position import PositionManager, Position
 from trading.trade import buy, sell
 from util.logger import Logger
+from util.const import *
 
 from database.model.transaction import TransactionManager
 

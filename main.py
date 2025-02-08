@@ -5,13 +5,10 @@ import trading.trade
 from environments.variables import UPBIT_ACCESS_KEY
 from environments.variables import UPBIT_SECRET_KEY
 from util.logger import Logger
+from util.timestamp import generate_timestamp
 
-TICKER = "KRW-USDT"
-BUY_QUANTITY = 50.0
-STEP = 1
-INTERVAL = 0.5
-TIMEOUT = 120
-
+#여기에 있던 변수들은 util.const로 옮겨졌습니다. main.py에서 뭔가를 export하면 
+#circular import문제가 자주 발생하는 듯 합니다...
 
 async def main():
     """ gRPC 서버와 자동매매 봇을 동시에 실행 """
@@ -33,5 +30,7 @@ if __name__ == '__main__':
         asyncio.run(main())  # 비동기 main 실행
     except Exception as e:
         Logger.get_logger().warning(f"Catastropic Error / OOB : {e}")
+    except KeyboardInterrupt as e:
+        Logger.get_logger().warning(f"Ctrl + C Input Shutdown Immidiate timestamp : " + generate_timestamp())
     finally:
         Logger.get_logger().warning(f"********** TetherHelix 프로그램 종료 **********")

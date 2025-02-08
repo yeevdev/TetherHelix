@@ -157,7 +157,7 @@ class TransactionManager(metaclass=Singleton):
         """
         self.client.execute_with_commit(query, (ask_uuid, ))
     
-    def get_transactions_unfinished(self, order_by: str) -> List[TransactionData]:
+    def get_transactions_unfinished(self, order_by: str = "asc") -> List[TransactionData]:
         #매도 체결까지 되지 않은 모든 거래를 불러옵니다.
         if order_by == "desc":
             order_by = "DESC"
