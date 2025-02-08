@@ -14,6 +14,15 @@ async def start_grpc_server():
         await server.start()
         Logger.get_logger().warning("✅ gRPC 서버 실행 중...")
         await server.wait_for_termination()
+    except RuntimeError:
+        Logger.get_logger().info("gRPC server에서 런타임 에러 발생 (Ctrl+C일 경우 무시)")
+        await server.stop(10)
+    except RuntimeWarning:
+        Logger.get_logger().info("gRPC server에서 런타임 에러 발생 (Ctrl+C일 경우 무시)")
+    except Exception as e:
+        Logger.get_logger().error(f"gRPC server에서 알수 없는 '{type(e)}' 에러 발생 \n {e=}")
     except:
-        Logger.get_logger().warning("Error from grpc_server.py. (Ctrl+C)일 경우, 무시해도 괜찮습니다. Graceful Shutdown in 10 sec.")
+        Logger.get_logger().error(f"gRPC server에서 알수 없는 에러 발생.")
+    finally:
+        Logger.get_logger().warning("Exception occured, graceful shutdown in 10 sec.")
         await server.stop(10)

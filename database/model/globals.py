@@ -21,11 +21,6 @@ class GlobalsManager(metaclass=Singleton):
 
     def create(self):
         #db생성 함수
-        extract = self.client.check_table_exists('transactions')
-        if extract:
-            Logger.get_logger().info("Creating table globals, Trying to get info from transaction.")
-        else:
-            Logger.get_logger().info("Creating table globals, Without transferring data from transaction(non existant)")
         query = """
         CREATE TABLE globals (
             total_tether_volume FLOAT DEFAULT 0,
@@ -37,15 +32,32 @@ class GlobalsManager(metaclass=Singleton):
         );
         """
         self.client.execute_with_commit(query)
-        query = """
-        INSERT INTO transactions (total_tether_volume, total_revenue, total_finished_transaction_count, total_bid_krw, total_ask_krw)
-        VALUES (0, 0, 0, 0, 0)
-        """
-        self.client.execute_with_commit(query)
+        extract = self.client.check_table_exists('transactions')
+        if extract:
+            Logger.get_logger().info("Creating table globals, Trying to get info from transaction.")
+            status = self.extract_info_from_transaction_table()
+            query = """
+            INSERT INTO globals (total_tether_volume, total_revenue, total_finished_transaction_count, total_bid_krw, total_ask_krw)
+            VALUES (?, ?, ?, ?, ?)
+            """
+            self.client.execute_with_commit(query, (
+                status["total(tether_volume)"], 
+                status["total(revenue)"], 
+                status["count(ask_filled_at)"], 
+                status["total(bid_krw)"], 
+                status["total(tether_volume * IFNULL(ask_price, 0))"]
+            ))
+        else:
+            Logger.get_logger().info("Creating table globals, Without transferring data from transaction(non existant)")
+            query = """
+            INSERT INTO globals (total_tether_volume, total_revenue, total_finished_transaction_count, total_bid_krw, total_ask_krw)
+            VALUES (0, 0, 0, 0, 0)
+            """
+            self.client.execute_with_commit(query)
 
     def extract_info_from_transaction_table(self) -> GlobalStatusData:
         query = """
-        SELECT total(tether_volume), total(revenue), count(ask_filled_at), total(bid_krw), total(ask_krw)
+        SELECT total(tether_volume), total(revenue), count(ask_filled_at), total(bid_krw), total(tether_volume * IFNULL(ask_price, 0))
         FROM transactions 
         WHERE order_status = 4
         """
@@ -54,16 +66,9 @@ class GlobalsManager(metaclass=Singleton):
             "total(revenue)", 
             "count(ask_filled_at)", 
             "total(bid_krw)", 
-            "total(ask_krw)"
+            "total(tether_volume * IFNULL(ask_price, 0))"
         ], query)
-        return GlobalStatusData(
-            bot_id="USDT-KRW", 
-            total_tether_volume=status["total(tether_volume)"],
-            total_revenue=status["total(revenue)"],
-            total_finished_transaction_count=status["count(ask_filled_at)"],
-            total_bid_krw=status["total(bid_krw)"],
-            total_ask_krw=status["total(ask_krw)"]
-        )
+        return status
 
     def get_global_stats(self) -> GlobalStatusData:
         #bot의 전체 상황을 볼때 쓰는 함수.

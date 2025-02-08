@@ -25,9 +25,8 @@ class MyGlobalsServicer(GlobalsServicer):
             context.set_code(grpc.StatusCode.UNAUTHENTICATED)
             context.set_details("Failed to authenticate")
         while self.globals_manager:
-            if context.is_active():
-                Logger.get_logger().debug(f"GetGlobalStatus called, count : {count}")
-                count += 1
-                yield self.globals_manager.get_global_stats()
+            Logger.get_logger().debug(f"GetGlobalStatus called, count : {count}")
+            count += 1
+            yield self.globals_manager.get_global_stats()
             asyncio.sleep(1)
             
