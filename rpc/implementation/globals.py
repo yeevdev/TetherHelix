@@ -17,7 +17,7 @@ class MyGlobalsServicer(GlobalsServicer):
         self.globals_manager = GlobalsManager()
         self.admin_manager = AdminManager()
 
-    def GetGlobalStatus(self, request: GlobalStatusRequest, context: ServicerContext):
+    async def GetGlobalStatus(self, request: GlobalStatusRequest, context: ServicerContext):
         """1. db에서 전역으로 이용하면 상태 변수들과 현재 상황(upbit로 부터, 쿼리.)
         """
         count = 0
@@ -28,5 +28,5 @@ class MyGlobalsServicer(GlobalsServicer):
             Logger.get_logger().debug(f"GetGlobalStatus called, count : {count}")
             count += 1
             yield self.globals_manager.get_global_stats()
-            asyncio.sleep(1)
+            await asyncio.sleep(1)
             

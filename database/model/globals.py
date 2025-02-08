@@ -1,7 +1,5 @@
 import pyupbit
 
-from typing import List, Optional
-
 from database.sqlite3 import SQLite3Client
 from database.model.dto.db_global_data import DBGlobalData
 
@@ -71,6 +69,8 @@ class GlobalsManager(metaclass=Singleton):
         return status
 
     def get_global_stats(self) -> GlobalStatusData:
+        current = pyupbit.get_current_price(TICKER)
+        #Logger.get_logger().info(f"{current} {int(current)}")
         #bot의 전체 상황을 볼때 쓰는 함수.
         query = """
         SELECT * FROM globals
@@ -78,7 +78,15 @@ class GlobalsManager(metaclass=Singleton):
         LIMIT 1;
         """
         result = self.client.execute_with_select(DBGlobalData, query)[0]
-        current = pyupbit.get_current_price(TICKER)
         rate = result.total_revenue / result.total_finished_transaction_count
-        data = GlobalStatusData(**result, bot_id="KRW-USDT", current_price=current, krw_gain_per_finished_transaction=rate)
+        data = GlobalStatusData(
+            bot_id="KRW-USDT", 
+            current_price=int(current), 
+            krw_gain_per_finished_transaction=rate,
+            total_ask_krw=int(result.total_ask_krw),
+            total_bid_krw=int(result.total_bid_krw),
+            total_finished_transaction_count=result.total_finished_transaction_count,
+            total_revenue=result.total_revenue,
+            total_tether_volume=result.total_tether_volume
+        )
         return data
