@@ -3,7 +3,7 @@ import pyupbit
 from database.sqlite3 import SQLite3Client
 from database.model.dto.db_global_data import DBGlobalData
 
-from tetherhelix_grpc.globals_pb2 import GlobalStatusData
+from tetherhelix_grpc.tetherbot_pb2 import GlobalStatusData
 
 from util.singleton import Singleton
 from util.logger import Logger
