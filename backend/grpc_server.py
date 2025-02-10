@@ -10,7 +10,7 @@ async def start_grpc_server():
         server = grpc.aio.server()
         tetherbot_pb2_grpc.add_TetherBotServicer_to_server(tetherbot.MyTetherbotServicer(), server)
         transaction_pb2_grpc.add_TransactionServicer_to_server(transaction.MyTransactionServicer(), server)
-        admin_pb2_grpc.add_AdminAuthServicer_to_server(admin.AdminAuthServicer(), server)
+        admin_pb2_grpc.add_AdminAuthServicer_to_server(admin.MyAdminAuthenticator(), server)
         server.add_insecure_port('[::]:50051')
         await server.start()
         Logger.get_logger().warning("✅ gRPC 서버 실행 중...")
