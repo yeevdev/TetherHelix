@@ -13,6 +13,6 @@ class UpbitClientManager(metaclass=Singleton):
         return UpbitClientManager.upbit_client
     
     def currency(self):
-        balances = UpbitClientManager().client().get_balances()
+        balances = self.upbit_client.get_balances()
         current_krw = next(item for item in balances if item["currency"] == "KRW")["balance"]
         return float(current_krw)

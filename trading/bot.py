@@ -15,17 +15,24 @@ from database.model.transaction import TransactionManager
 
 class TradingBot:
     display_price = 0.0 #unsafe value, only for public read purpose(디스플레이 전용!!!! 절대로 참조해서 이용X)
+    display_currency = 0.0
 
     def __init__(self):
         self.upbit = UpbitClientManager().client()
         self.position_manager = PositionManager.get_position_manager()
         self.transaction_database_manager = TransactionManager()
+        self.fetch_currency()
 
     def get_price(self):
         TradingBot.display_price = price = pyupbit.get_current_price(TICKER)
         return price
 
+    def fetch_currency(self):
+        TradingBot.display_currency = self.currency_krw = UpbitClientManager().currency()
+        return self.currency_krw
+
     async def run(self):
+        self.fetch_currency()
         while True:
             try:
                 current_price = self.get_price()
@@ -47,7 +54,11 @@ class TradingBot:
     def check_buy(self, current_price) -> bool:
         pm = self.position_manager
         if pm.is_positions_empty():
-            return True
+            if self.currency_krw < BUY_QUANTITY * current_price:
+                Logger.get_logger().warning(f"돈이 충분하지 않음. {self.currency_krw} < {BUY_QUANTITY * current_price}")
+                return False
+            else:
+                return True
 
         target_price = pm.get_last_position().entry_price - STEP
 
@@ -56,10 +67,12 @@ class TradingBot:
     def check_sell(self, current_price) -> bool:
         pm = self.position_manager
 
+        Logger.get_logger().info(f"매도 포지션 확인중...")
         if pm.is_positions_empty():
             return False
 
         if pm.get_position_by_target_price(current_price):
+
             return True
 
         return False
@@ -95,6 +108,7 @@ class TradingBot:
                     else:
                         pos = self.position_manager.get_position_by_uuid(order_uuid)
                         self.position_manager.update_position(pos, order)
+                    self.fetch_currency()
 
                 pre_vol = executed_volume
 
@@ -152,6 +166,7 @@ class TradingBot:
 
                 if executed_volume > pre_vol:
                     self.position_manager.update_position(position, order)
+                    self.fetch_currency()
 
                 pre_vol = executed_volume
                 threshold_price = position.entry_price - 1
