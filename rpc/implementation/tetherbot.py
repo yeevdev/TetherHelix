@@ -6,11 +6,10 @@ from grpc import ServicerContext
 from database.model.globals import GlobalsManager
 from database.model.admin import AdminManager
 
-from tetherhelix_grpc.tetherbot_pb2 import BotRequest, BotTradeMetadata, GlobalStatusData
+from tetherhelix_grpc.tetherbot_pb2 import BotRequest, BotTradeMetadata, GlobalStatusData, BotConnectivity
 from tetherhelix_grpc.tetherbot_pb2_grpc import TetherBotServicer
 
 from trading.bot import TradingBot
-from trading.upbit import UpbitClientManager
 
 from util.logger import Logger
 
@@ -32,8 +31,7 @@ class MyTetherbotServicer(TetherBotServicer):
             count += 1
             status = self.globals_manager.get_global_stats()
             current = TradingBot.display_price
-            balances = UpbitClientManager().client().get_balances()
-            current_krw = next(item for item in balances if item["currency"] == "KRW")["balance"]
+            current_krw = TradingBot.display_currency
             rate = status.total_revenue / status.total_finished_transaction_count
 
             data = GlobalStatusData(
@@ -67,9 +65,11 @@ class MyTetherbotServicer(TetherBotServicer):
     def GetConnectivityStatus(self, request, context):
         """3. proxy -> backend -> bot -> upbit 등의 커넥션을 점검
         """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        current = TradingBot.display_price
+        if current:
+            return BotConnectivity(backend="OK", upbit="OK")
+        else:
+            return BotConnectivity(backend="OK", upbit="UNAVALIABLE")
 
     def Start(self, request, context):
         """4. bot start / stop을 제어
