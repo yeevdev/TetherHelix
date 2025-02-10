@@ -6,22 +6,29 @@ import asyncio
 
 from trading.position import PositionManager, Position
 from trading.trade import buy, sell
+from trading.upbit import UpbitClientManager
+
 from util.logger import Logger
 from util.const import *
 
 from database.model.transaction import TransactionManager
 
 class TradingBot:
+    display_price = 0.0 #unsafe value, only for public read purpose(디스플레이 전용!!!! 절대로 참조해서 이용X)
 
-    def __init__(self, access_key, secret_key):
-        self.upbit = pyupbit.Upbit(access_key, secret_key)
+    def __init__(self):
+        self.upbit = UpbitClientManager().client()
         self.position_manager = PositionManager.get_position_manager()
         self.transaction_database_manager = TransactionManager()
+
+    def get_price(self):
+        TradingBot.display_price = price = pyupbit.get_current_price(TICKER)
+        return price
 
     async def run(self):
         while True:
             try:
-                current_price = pyupbit.get_current_price(TICKER)
+                current_price = self.get_price()
 
                 if self.check_buy(current_price):
                     await self.open_position(current_price, BUY_QUANTITY)
@@ -106,7 +113,7 @@ class TradingBot:
                     return
 
                 # 주문취소 임계가격 확인
-                if pyupbit.get_current_price(TICKER) >= threshold_price:
+                if self.get_price() >= threshold_price:
                     self.upbit.cancel_order(order_uuid)
                     self.transaction_database_manager.order_failed_after_bid_placed(order_uuid)
 
@@ -174,7 +181,7 @@ class TradingBot:
                     return
 
                 # 주문취소 임계가격 확인
-                if pyupbit.get_current_price(TICKER) <= threshold_price:
+                if self.get_price() <= threshold_price:
                     self.upbit.cancel_order(order_uuid)
                     self.transaction_database_manager.order_failed_after_ask_placed(order_uuid)
 

@@ -2,8 +2,6 @@ import asyncio
 from backend.grpc_server import start_grpc_server
 import trading.bot
 import trading.trade
-from environments.variables import UPBIT_ACCESS_KEY
-from environments.variables import UPBIT_SECRET_KEY
 from util.logger import Logger
 from util.timestamp import generate_timestamp
 
@@ -12,7 +10,7 @@ from util.timestamp import generate_timestamp
 
 async def main():
     """ gRPC 서버와 자동매매 봇을 동시에 실행 """
-    bot = trading.bot.TradingBot(UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY)
+    bot = trading.bot.TradingBot()
 
     # gRPC 서버 실행 (비동기)
     grpc_task = asyncio.create_task(start_grpc_server())

@@ -3,12 +3,8 @@ import pyupbit
 from database.sqlite3 import SQLite3Client
 from database.model.dto.db_global_data import DBGlobalData
 
-from tetherhelix_grpc.tetherbot_pb2 import GlobalStatusData
-
 from util.singleton import Singleton
 from util.logger import Logger
-
-from trading.bot import TICKER
 
 class GlobalsManager(metaclass=Singleton):
     def __init__(self):
@@ -53,7 +49,7 @@ class GlobalsManager(metaclass=Singleton):
             """
             self.client.execute_with_commit(query)
 
-    def extract_info_from_transaction_table(self) -> GlobalStatusData:
+    def extract_info_from_transaction_table(self):
         query = """
         SELECT total(tether_volume), total(revenue), count(ask_filled_at), total(bid_krw), total(tether_volume * IFNULL(ask_price, 0))
         FROM transactions 
@@ -68,8 +64,7 @@ class GlobalsManager(metaclass=Singleton):
         ], query)
         return status
 
-    def get_global_stats(self) -> GlobalStatusData:
-        current = pyupbit.get_current_price(TICKER)
+    def get_global_stats(self) -> DBGlobalData:
         #Logger.get_logger().info(f"{current} {int(current)}")
         #bot의 전체 상황을 볼때 쓰는 함수.
         query = """
@@ -78,15 +73,4 @@ class GlobalsManager(metaclass=Singleton):
         LIMIT 1;
         """
         result = self.client.execute_with_select(DBGlobalData, query)[0]
-        rate = result.total_revenue / result.total_finished_transaction_count
-        data = GlobalStatusData(
-            bot_id="KRW-USDT", 
-            current_price=int(current), 
-            krw_gain_per_finished_transaction=rate,
-            total_ask_krw=int(result.total_ask_krw),
-            total_bid_krw=int(result.total_bid_krw),
-            total_finished_transaction_count=result.total_finished_transaction_count,
-            total_revenue=result.total_revenue,
-            total_tether_volume=result.total_tether_volume
-        )
-        return data
+        return result
