@@ -165,8 +165,8 @@ class TransactionManager(metaclass=Singleton):
             order_by = "ASC"
         query = f"""
         SELECT * FROM transactions
-        WHERE bid_failed = 0 AND ask_failed = 0 AND 
-            (order_status = 1 OR order_status = 2 OR order_status = 3)
+        WHERE ((order_status = 1 OR order_status = 2) AND bid_failed = 0) OR
+            (order_status = 3 AND ask_failed = 0)
         ORDER BY bid_created_at {order_by};
         """
         result = self.client.execute_with_select(TransactionData, query)

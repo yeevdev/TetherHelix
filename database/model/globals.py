@@ -74,3 +74,23 @@ class GlobalsManager(metaclass=Singleton):
         """
         result = self.client.execute_with_select(DBGlobalData, query)[0]
         return result
+
+    def bid_filled(self, volume, price):
+        bid_krw = price * volume
+        query = """
+        UPDATE globals
+        SET
+            total_tether_volume = total_tether_volume + ?,
+            total_bid_krw = total_bid_krw + ?
+        """
+        self.client.execute_with_commit(query, (volume, bid_krw))
+
+    def ask_filled(self, revenue, ask_krw):
+        query = """
+        UPDATE globals
+        SET
+            total_finished_transaction_count = total_finished_transaction_count + 1,
+            total_revenue = total_revenue + ?,
+            total_ask_krw = total_ask_krw + ?
+        """
+        self.client.execute_with_commit(query, (revenue, ask_krw))

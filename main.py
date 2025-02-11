@@ -27,7 +27,7 @@ if __name__ == '__main__':
         Logger.get_logger().warning(f"********** TetherHelix 프로그램 시작 **********")
         asyncio.run(main())  # 비동기 main 실행
     except Exception as e:
-        Logger.get_logger().warning(f"Catastropic Error / OOB : {e}")
+        Logger.get_logger().warning(f"Catastropic Error / OOB : {e} : Trace : {e.with_traceback}")
     except KeyboardInterrupt as e:
         Logger.get_logger().warning(f"Ctrl + C Input Shutdown Immidiate timestamp : " + generate_timestamp())
     finally:

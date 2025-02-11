@@ -12,6 +12,7 @@ from util.logger import Logger
 from util.const import *
 
 from database.model.transaction import TransactionManager
+from database.model.globals import GlobalsManager
 
 class TradingBot:
     display_price = 0.0 #unsafe value, only for public read purpose(디스플레이 전용!!!! 절대로 참조해서 이용X)
@@ -19,6 +20,7 @@ class TradingBot:
 
     def __init__(self):
         self.upbit = UpbitClientManager().client()
+        self.globals = GlobalsManager()
         self.position_manager = PositionManager.get_position_manager()
         self.transaction_database_manager = TransactionManager()
         self.fetch_currency()
@@ -118,6 +120,7 @@ class TradingBot:
                     pos = self.position_manager.get_position_by_uuid(order_uuid)
                     idx = self.position_manager.get_index_by_pos(pos)
                     self.transaction_database_manager.bid_filled(order_uuid, order.get("paid_fee"))
+                    self.globals.bid_filled(pre_vol, price)
 
                     Logger.get_logger().info(f"포지션 진입 완료 - {idx+1}번 포지션  진입가:{pos.entry_price} 목표가:{pos.target_price} 수량:{pos.volume}")
                     return
@@ -182,6 +185,7 @@ class TradingBot:
                                      - round((executed_volume * position.entry_price) + buy_fee))
 
                     self.transaction_database_manager.ask_filled(order_uuid, sell_fee, total_revenue)
+                    self.globals.ask_filled((executed_volume * position.target_price), total_revenue)
 
                     Logger.get_logger().info(f"포지션 종료 완료 - {idx+1}번 포지션  "
                                              f"진입가:{position.entry_price} 목표가:{position.target_price} "
