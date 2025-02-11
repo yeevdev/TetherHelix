@@ -45,6 +45,17 @@ class SQLite3Client(metaclass=Singleton):
         dtos = [cls(**row) for row in result]
         cursor.close()
         return dtos
+    
+    def execute_with_select_dictionary_column(self, col: List[str], query: str, args: tuple = ()) -> dict:
+        self.connection.row_factory = sqlite3.Row
+        cursor = self.connection.cursor()
+        if args:
+            cursor.execute(query, (*args,))
+        else:
+            cursor.execute(query)
+        result = cursor.fetchone()
+        result_dict = { col_name:result[col_name] for col_name in col }
+        return result_dict
 
     def execute_with_commit(self, query: str, args: tuple = ()) -> None:
         cursor = self.connection.cursor()

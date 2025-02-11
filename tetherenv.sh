@@ -46,5 +46,5 @@ elif { [ "$1" == "proxy" ]; }; then
     echo "Starting proxy for next.js...(docker)"
     cd $CURR/proxy
     docker build -t envoy-grpc-web .
-    docker run --net=host -p 8080:8080 -p 9901:9901 -v $(pwd)/envoy.yaml:/etc/envoy/envoy.yaml --rm envoy-grpc-web -c /etc/envoy/envoy.yaml --log-level debug
+    docker run --net=host -p 8080:8080 -p 9901:9901 -v $(pwd)/envoy.yaml:/etc/envoy/envoy.yaml --rm envoy-grpc-web -c /etc/envoy/envoy.yaml --log-level warning
 fi
