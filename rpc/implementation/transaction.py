@@ -18,9 +18,6 @@ class MyTransactionServicer(TransactionServicer):
     def GetCurrentTransactions(self, request: TransactionRequest, context: ServicerContext):
         """1. 현재 보유 포지션 조회 bot 및 front가 둘다 요청 가능 (단일 요청-응답)
         """
-        if not self.admin_manager.check_authenicated(request.db_auth):
-            context.set_code(grpc.StatusCode.UNAUTHENTICATED)
-            context.set_details("Failed to authenticate")
         transactions = self.transaction_manager.get_transactions_unfinished(request.order_by)
         #Logger.get_logger().info(f"GetCurrentTransactions : Sample len({len(transactions)})")
         context.set_code(grpc.StatusCode.OK)

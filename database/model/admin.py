@@ -55,4 +55,4 @@ class AdminManager(metaclass=Singleton):
         pass
 
     def check_authenicated(self, db_auth: str):
-        return True
+        return db_auth == "very very secure token!"

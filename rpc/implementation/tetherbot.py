@@ -22,31 +22,23 @@ class MyTetherbotServicer(TetherBotServicer):
     def GetGlobalStatus(self, request: BotRequest, context: ServicerContext):
         """1. db에서 전역으로 이용하면 상태 변수들과 현재 상황(upbit로 부터, 쿼리.)
         """
-        count = 0
-        Logger.get_logger().warning(f"GetGlobalStatus called, count : {count}")
-        if not self.admin_manager.check_authenicated(request.db_auth):
-            context.set_code(grpc.StatusCode.UNAUTHENTICATED)
-            context.set_details("Failed to authenticate")
-        while self.globals_manager:
-            count += 1
-            status = self.globals_manager.get_global_stats()
-            current = TradingBot.display_price
-            current_krw = TradingBot.display_currency
-            rate = status.total_revenue / status.total_finished_transaction_count
+        Logger.get_logger().debug(f"GetGlobalStatus called")
+        status = self.globals_manager.get_global_stats()
+        current = TradingBot.display_price
+        current_krw = TradingBot.display_currency
+        rate = status.total_revenue / status.total_finished_transaction_count if status.total_finished_transaction_count > 0 else 0
 
-            data = GlobalStatusData(
-                bot_id="KRW-USDT", 
-                current_krw=int(float(current_krw)),
-                current_price=int(current),
-                krw_gain_per_finished_transaction=rate,
-                total_ask_krw=int(status.total_ask_krw),
-                total_bid_krw=int(status.total_bid_krw),
-                total_finished_transaction_count=status.total_finished_transaction_count,
-                total_revenue=status.total_revenue,
-                total_tether_volume=status.total_tether_volume
-            )
-            yield data
-            #await asyncio.sleep(1)
+        return GlobalStatusData(
+            bot_id="KRW-USDT", 
+            current_krw=int(float(current_krw)),
+            current_price=int(current),
+            krw_gain_per_finished_transaction=rate,
+            total_ask_krw=int(status.total_ask_krw),
+            total_bid_krw=int(status.total_bid_krw),
+            total_finished_transaction_count=status.total_finished_transaction_count,
+            total_revenue=status.total_revenue,
+            total_tether_volume=status.total_tether_volume
+        )
     
     def GetBotMetaData(self, request, context):
         """0.4.0
