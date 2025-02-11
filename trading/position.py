@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from typing import List
 
-from main import *
-
 from database.model.transaction import TransactionManager
 from tetherhelix_grpc.transaction_pb2 import TransactionData
 from util.timestamp import generate_timestamp, convert_iso_to_general
+from util.logger import Logger
+from util.const import STEP
 
 @dataclass
 class Position:
