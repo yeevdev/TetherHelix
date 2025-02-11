@@ -22,8 +22,11 @@ class TradingBot:
                 current_price = pyupbit.get_current_price(TICKER)
 
                 if self.check_buy(current_price):
-                    last_price = self.position_manager.get_last_position().entry_price
-                    await self.open_position(last_price-STEP, BUY_QUANTITY)
+                    if self.position_manager.is_positions_empty():
+                        await self.open_position(current_price, BUY_QUANTITY)
+                    else:
+                        last_price = self.position_manager.get_last_position().entry_price
+                        await  self.open_position(last_price-STEP, BUY_QUANTITY)
 
                 if self.check_sell(current_price):
                     target_position = self.position_manager.get_position_by_target_price(current_price)
