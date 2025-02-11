@@ -1,9 +1,9 @@
 import logging
 import os
 from datetime import datetime
+from util.singleton import Singleton
 
-
-class Logger:
+class Logger(metaclass=Singleton):
     _instance = None
 
     def __init__(self):

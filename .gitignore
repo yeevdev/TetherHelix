@@ -135,7 +135,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-tetherhelix_pyenv/
+requirements.bak.txt
 
 # Spyder project settings
 .spyderproject
@@ -176,3 +176,5 @@ cython_debug/
 
 #database
 tetherhelix.db
+tetherhelix.bak.db
+logs/
