@@ -85,12 +85,13 @@ class GlobalsManager(metaclass=Singleton):
         """
         self.client.execute_with_commit(query, (volume, bid_krw))
 
-    def ask_filled(self, revenue, ask_krw):
+    def ask_filled(self, revenue, ask_krw, tether_volume):
         query = """
         UPDATE globals
         SET
             total_finished_transaction_count = total_finished_transaction_count + 1,
             total_revenue = total_revenue + ?,
-            total_ask_krw = total_ask_krw + ?
+            total_ask_krw = total_ask_krw + ?,
+            total_tether_volume = total_tether_volume - ?
         """
-        self.client.execute_with_commit(query, (revenue, ask_krw))
+        self.client.execute_with_commit(query, (revenue, ask_krw, tether_volume))
