@@ -188,7 +188,7 @@ class TradingBot:
                                      - round((executed_volume * position.entry_price) + buy_fee))
 
                     self.transaction_database_manager.ask_filled(order_uuid, sell_fee, total_revenue)
-                    self.globals.ask_filled((executed_volume * position.target_price), total_revenue)
+                    self.globals.ask_filled(total_revenue, (executed_volume * position.target_price), executed_volume)
 
                     Logger.get_logger().info(f"포지션 종료 완료 - {idx+1}번 포지션  "
                                              f"진입가:{position.entry_price} 목표가:{position.target_price} "
